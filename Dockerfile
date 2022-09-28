@@ -4,6 +4,7 @@ RUN dnf module -y install python39 && dnf install -y python39 python39-pip && dn
 
 RUN mkdir /stressng
 RUN chmod 777 /stressng
+ADD https://raw.githubusercontent.com/arcalot/arcaflow-plugins/main/LICENSE /stressng
 ADD stressng_plugin.py /stressng
 ADD requirements.txt /stressng
 ADD stressng_example.yaml /stressng
