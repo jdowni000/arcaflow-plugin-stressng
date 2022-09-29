@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
-
-from os import system
 import sys
 import typing
 import tempfile
 import yaml
-import json
 import subprocess
 import os
 import enum
@@ -14,7 +11,6 @@ import dataclasses
 from dataclasses import dataclass, field
 
 from arcaflow_plugin_sdk import plugin
-from arcaflow_plugin_sdk import schema
 from arcaflow_plugin_sdk import annotations
 
 
@@ -42,7 +38,9 @@ class CpuStressorParams:
         default="all",
         metadata={
             "name": "CPU stressor method",
-            "description": "fine grained control of which cpu stressors to use (ackermann, cfloat etc.",
+            "description": """fine grained control of which
+                              cpu stressors to use (ackermann,
+                              cfloat etc.""",
         },
     )
 
@@ -65,7 +63,8 @@ class VmStressorParams:
     vm: int = field(
         metadata={
             "name": "VM count",
-            "description": "Number of VM stressors to be run (0 means 1 stressor per CPU",
+            "description": """Number of VM stressors to be
+                              run (0 means 1 stressor per CPU""",
         }
     )
     vm_bytes: str = field(
@@ -76,7 +75,10 @@ class VmStressorParams:
     )
     mmap: typing.Optional[str] = field(
         default=None,
-        metadata={"name": "mmap", "description": "Number of stressors per CPU"},
+        metadata={
+            "name": "mmap",
+            "description": "Number of stressors per CPU",
+        }
     )
     mmap_bytes: typing.Optional[str] = field(
         default=None, metadata={"name": "Allocation of memory per stressor"}
@@ -105,7 +107,8 @@ class MatrixStressorParams:
     matrix: int = field(
         metadata={
             "name": "Matrix count",
-            "description": "Number of Matrix stressors to be run (0 means 1 stressor per CPU",
+            "description": """Number of Matrix stressors to be
+                              run (0 means 1 stressor per CPU""",
         }
     )
 
@@ -125,7 +128,8 @@ class MqStressorParams:
     mq: int = field(
         metadata={
             "name": "MQ count",
-            "description": "Number of MQ stressors to be run (0 means 1 stressor per CPU",
+            "description": """Number of MQ stressors to be run
+                              (0 means 1 stressor per CPU""",
         }
     )
 
@@ -143,10 +147,16 @@ class StressNGParams:
     """
 
     timeout: str = field(
-        metadata={"name": "Runtime", "description": "Time to run the benchmark test"}
+        metadata={
+            "name": "Runtime",
+            "description": "Time to run the benchmark test"
+        }
     )
     cleanup: bool = field(
-        metadata={"name": "Cleanup", "description": "Cleanup after the benchmark run"}
+        metadata={
+            "name": "Cleanup",
+            "description": "Cleanup after the benchmark run"
+        }
     )
     items: typing.List[
         typing.Annotated[
@@ -158,7 +168,8 @@ class StressNGParams:
                     VmStressorParams, annotations.discriminator_value("vm")
                 ],
                 typing.Annotated[
-                    MatrixStressorParams, annotations.discriminator_value("matrix")
+                    MatrixStressorParams, annotations.discriminator_value(
+                        "matrix")
                 ],
                 typing.Annotated[
                     MqStressorParams, annotations.discriminator_value("mq")
@@ -168,7 +179,11 @@ class StressNGParams:
         ]
     ]
     verbose: typing.Optional[bool] = field(
-        default=None, metadata={"name": "verbose", "description": "verbose output"}
+        default=None,
+        metadata={
+            "name": "verbose",
+            "description": "verbose output"
+         },
     )
     metrics_brief: typing.Optional[bool] = field(
         default=None,
@@ -241,9 +256,17 @@ class SystemInfoOutput:
         }
     )
     hostname: str = field(
-        metadata={"name": "hostname", "description": "host on which the test was run"}
+        metadata={
+            "name": "hostname",
+            "description": "host on which the test was run"
+        }
     )
-    sysname: str = field(metadata={"name": "system name", "description": "System name"})
+    sysname: str = field(
+        metadata={
+           "name": "system name",
+           "description": "System name"
+        }
+    )
     nodename: str = field(
         metadata={
             "name": "nodename",
@@ -257,7 +280,8 @@ class SystemInfoOutput:
         }
     )
     version: str = field(
-        metadata={"name": "version", "description": "version on which the test was run"}
+        metadata={"name": "version",
+                  "description": "version on which the test was run"}
     )
     machine: str = field(
         metadata={
@@ -352,7 +376,9 @@ class VMOutput:
     bogo_ops_per_second_real_time: float = dataclasses.field(
         metadata={"id": "bogo-ops-per-second-real-time"}
     )
-    wall_clock_time: float = dataclasses.field(metadata={"id": "wall-clock-time"})
+    wall_clock_time: float = dataclasses.field(
+        metadata={"id": "wall-clock-time"}
+    )
     user_time: float = dataclasses.field(metadata={"id": "user-time"})
     system_time: float = dataclasses.field(metadata={"id": "system-time"})
     cpu_usage_per_instance: float = dataclasses.field(
@@ -377,7 +403,9 @@ class CPUOutput:
     bogo_ops_per_second_real_time: float = dataclasses.field(
         metadata={"id": "bogo-ops-per-second-real-time"}
     )
-    wall_clock_time: float = dataclasses.field(metadata={"id": "wall-clock-time"})
+    wall_clock_time: float = dataclasses.field(
+        metadata={"id": "wall-clock-time"}
+    )
     user_time: float = dataclasses.field(metadata={"id": "user-time"})
     system_time: float = dataclasses.field(metadata={"id": "system-time"})
     cpu_usage_per_instance: float = dataclasses.field(
@@ -402,7 +430,9 @@ class MatrixOutput:
     bogo_ops_per_second_real_time: float = dataclasses.field(
         metadata={"id": "bogo-ops-per-second-real-time"}
     )
-    wall_clock_time: float = dataclasses.field(metadata={"id": "wall-clock-time"})
+    wall_clock_time: float = dataclasses.field(
+        metadata={"id": "wall-clock-time"}
+    )
     user_time: float = dataclasses.field(metadata={"id": "user-time"})
     system_time: float = dataclasses.field(metadata={"id": "system-time"})
     cpu_usage_per_instance: float = dataclasses.field(
@@ -427,7 +457,9 @@ class MQOutput:
     bogo_ops_per_second_real_time: float = dataclasses.field(
         metadata={"id": "bogo-ops-per-second-real-time"}
     )
-    wall_clock_time: float = dataclasses.field(metadata={"id": "wall-clock-time"})
+    wall_clock_time: float = dataclasses.field(
+        metadata={"id": "wall-clock-time"}
+    )
     user_time: float = dataclasses.field(metadata={"id": "user-time"})
     system_time: float = dataclasses.field(metadata={"id": "system-time"})
     cpu_usage_per_instance: float = dataclasses.field(
@@ -460,7 +492,8 @@ class WorkloadError:
     error: str
 
 
-# The following is a decorator (starting with @). We add this in front of our function to define the medadata for our step.
+# The following is a decorator (starting with @).
+# We add this in front of our function to define the medadata for our step.
 @plugin.step(
     id="workload",
     name="stress-ng workload",
@@ -469,9 +502,11 @@ class WorkloadError:
 )
 def stressng_run(
     params: WorkloadParams,
-) -> typing.Tuple[str, typing.Union[WorkloadResults, WorkloadError],]:
+) -> typing.Tuple[str, typing.Union[WorkloadResults, WorkloadError], ]:
     """
-    This function is implementing the step. It needs the decorator to turn it into a step. The type hints for the params are required.
+    This function is implementing the step.
+    It needs the decorator to turn it into a step.
+    The type hints for the params are required.
     """
 
     print("==>> Generating temporary jobfile...")
@@ -511,12 +546,16 @@ def stressng_run(
     try:
         print(
             subprocess.check_output(
-                stressng_command, cwd="/tmp", text=True, stderr=subprocess.STDOUT
+                stressng_command,
+                cwd="/tmp",
+                text=True,
+                stderr=subprocess.STDOUT
             )
         )
     except subprocess.CalledProcessError as error:
         return "error", WorkloadError(
-            f"{error.cmd[0]} failed with return code {error.returncode}:\n{error.output}"
+            f"""{error.cmd[0]} failed with return code
+                {error.returncode}:\n{error.output}"""
         )
 
     try:
@@ -524,8 +563,9 @@ def stressng_run(
             try:
                 stressng_yaml = yaml.safe_load(output)
             except yaml.YAMLError as error:
-                print(e)
-                return "error", WorkloadError(f"{error} in {stressng_outfile[1]}")
+                print(error)
+                return "error", WorkloadError(f"""{error} in
+                                                  {stressng_outfile[1]}""")
     except EnvironmentError as error:
         return "error", WorkloadError(
             f"{error} while trying to open {stressng_outfile[1]}"
@@ -556,7 +596,7 @@ def stressng_run(
     os.close(stressng_outfile[0])
 
     # TODO: if cleanup is set to true, remove the temporary files
-    if params.StressNGParams.cleanup == True:
+    if params.StressNGParams.cleanup:
         print("==>> Cleaning up operation files...")
         os.remove(stressng_jobfile[1])
 

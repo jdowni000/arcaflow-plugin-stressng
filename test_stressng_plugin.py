@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-import re
-import tempfile
 import unittest
 import yaml
-from filecmp import cmp
 import stressng_plugin
 from arcaflow_plugin_sdk import plugin
 
@@ -17,7 +14,9 @@ class StressNGTest(unittest.TestCase):
         )
 
         plugin.test_object_serialization(
-            stressng_plugin.VmStressorParams(stressor="vm", vm=2, vm_bytes="2G")
+            stressng_plugin.VmStressorParams(
+                stressor="vm", vm=2, vm_bytes="2G"
+            )
         )
 
         plugin.test_object_serialization(
@@ -28,8 +27,10 @@ class StressNGTest(unittest.TestCase):
         )
 
     def test_functional_cpu(self):
-        # idea is to run a small cpu bound benchmark and compare its output with a known-good output
-        # this is clearly not perfect, as we're limited to the field names and can't do a direct
+        # idea is to run a small cpu bound benchmark and
+        # compare its output with a known-good output
+        # this is clearly not perfect, as we're limited to the
+        # field names and can't do a direct
         # comparison of the returned values
 
         cpu = stressng_plugin.CpuStressorParams(
@@ -40,7 +41,9 @@ class StressNGTest(unittest.TestCase):
             timeout="99m", cleanup="False", items=[cpu]
         )
 
-        input = stressng_plugin.WorkloadParams(StressNGParams=stress, cleanup="False")
+        # input = stressng_plugin.WorkloadParams(
+        #     StressNGParams=stress, cleanup="False"
+        # )
 
         reference_jobfile = "./reference_jobfile"
 
