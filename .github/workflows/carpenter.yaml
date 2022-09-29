@@ -2,7 +2,7 @@ name: Carpentry
 on:
   push:
     branches:
-      - add-gha
+      - main
   pull_request:
 env:
   IMAGE_NAME: arcaflow-plugin-stressng
