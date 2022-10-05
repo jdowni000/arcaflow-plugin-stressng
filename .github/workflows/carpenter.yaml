@@ -9,16 +9,14 @@ env:
   IMAGE_TAG: 'latest'
   GITHUB_USERNAME: ${{ github.actor }}
   GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  QUAY_USERNAME: ${{ secrets.QUAY_CARPENTER_USERNAME }}
-  QUAY_PASSWORD: ${{ secrets.QUAY_CARPENTER_PASSWORD }}
 jobs:
   carpenter-build:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout this project
+      - name: Checkout
         uses: actions/checkout@v3
       - name: carpenter build
-        uses: mfleader/arcaflow-plugin-image-builder@gh-container-axn
+        uses: arcalot/arcaflow-plugin-stressng-builder@v1.0.0
         with:
           args: build --build --push
