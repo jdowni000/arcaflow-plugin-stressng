@@ -5,7 +5,6 @@ description = "arcaflow plugin for stressng"
 authors = ["arcalot"]
 license = "Apache-2.0+GPL-2.0-only"
 readme = "README.md"
-packages = [{include = "arcaflow_plugin_stressng"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"

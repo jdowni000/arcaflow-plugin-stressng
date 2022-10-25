@@ -4,7 +4,7 @@ RUN dnf module -y install python39 && dnf install -y python39 python39-pip && dn
 
 RUN mkdir /stressng
 RUN chmod 777 /stressng
-ADD stressng_plugin.py /stressng
+ADD stressng_plugin.py /stressng/
 ADD poetry.lock /stressng/
 ADD pyproject.toml /stressng/
 ADD stressng_example.yaml /stressng/
