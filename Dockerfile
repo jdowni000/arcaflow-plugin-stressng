@@ -9,6 +9,7 @@ ADD requirements.txt /stressng
 ADD stressng_example.yaml /stressng
 ADD test_stressng_plugin.py /stressng
 RUN chmod +x /stressng/stressng_plugin.py /stressng/test_stressng_plugin.py
+ADD https://raw.githubusercontent.com/arcalot/arcaflow-plugins/main/LICENSE /plugin
 WORKDIR /stressng
 
 RUN pip3 install -r requirements.txt
