@@ -5,10 +5,10 @@ RUN dnf module -y install python39 && dnf install -y python39 python39-pip && dn
 RUN mkdir /stressng
 RUN chmod 777 /stressng
 ADD stressng_plugin.py /stressng
-ADD poetry.lock /stressng
-ADD pyproject.toml /stressng
-ADD stressng_example.yaml /stressng
-ADD test_stressng_plugin.py /stressng
+ADD poetry.lock /stressng/
+ADD pyproject.toml /stressng/
+ADD stressng_example.yaml /stressng/
+ADD test_stressng_plugin.py /stressng/
 RUN chmod +x /stressng/stressng_plugin.py /stressng/test_stressng_plugin.py
 ADD https://raw.githubusercontent.com/arcalot/arcaflow-plugins/main/LICENSE /plugin
 WORKDIR /stressng
