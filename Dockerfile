@@ -4,7 +4,7 @@ RUN dnf module -y install python39 && dnf install -y python39 python39-pip && dn
 
 RUN mkdir /stressng
 RUN chmod 777 /stressng
-ADD https://raw.githubusercontent.com/arcalot/arcaflow-plugins/main/LICENSE /stressng/
+ADD https://raw.githubusercontent.com/arcalot/arcaflow-plugin-template-python/main/LICENSE /stressng/
 ADD README.md /stressng/
 ADD stressng_plugin.py /stressng/
 ADD poetry.lock /stressng/
@@ -23,8 +23,8 @@ USER 1000
 ENTRYPOINT ["/stressng/stressng_plugin.py"]
 CMD []
 
-LABEL org.opencontainers.image.source="https://github.com/arcalot/arcaflow-plugins/tree/main/python/stressng"
-LABEL org.opencontainers.image.licenses="Apache-2.0+GPL-2.0-only"
+LABEL org.opencontainers.image.source="https://github.com/arcalot/arcaflow-plugin-stressng"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.vendor="Arcalot project"
 LABEL org.opencontainers.image.authors="Arcalot contributors"
 LABEL org.opencontainers.image.title="Arcaflow stress-ng workload plugin"
