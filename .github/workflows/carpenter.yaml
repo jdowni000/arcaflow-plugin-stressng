@@ -1,25 +1,18 @@
-name: Carpentry
+name: Carpenter
 on:
   push:
     branches:
-      - main
-  pull_request:
-env:
-  IMAGE_NAME: arcaflow-plugin-stressng
-  IMAGE_TAG: 'latest'
-  GITHUB_USERNAME: ${{ github.actor }}
-  GITHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-  QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
-  QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-  QUAY_PASSWORD: ${{ secrets.QUAY_PASSWORD }}
+      - "**"
+  release:
+    types:
+      - published
 jobs:
-  carpenter-build:
-    name: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout this project
-        uses: actions/checkout@v3
-      - name: carpenter build
-        uses: arcalot/arcaflow-plugin-image-builder@main
-        with:
-          args: build --build --push
+  carpenter:
+    uses: arcalot/arcaflow-reusable-workflows/.github/workflows/carpenter.yaml@main
+    with:
+      image_name: ${{ github.event.repository.name }}
+      image_tag: 'latest'
+      quay_img_exp: 'never'
+      github_username: ${{ github.actor }}
+      github_namespace: ${{ github.repository_owner }}
+    secrets: inherit
