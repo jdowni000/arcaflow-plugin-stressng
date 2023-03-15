@@ -210,7 +210,7 @@ class WorkloadParams:
     """
 
     StressNGParams: StressNGParams
-    cleanup: typing.Optional[bool] = "True"
+    cleanup: typing.Optional[bool] = True
 
 
 @dataclass
