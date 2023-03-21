@@ -2,7 +2,7 @@
 
 import unittest
 import yaml
-import stressng_plugin
+from arcaflow_plugin_stressng import stressng_plugin
 from arcaflow_plugin_sdk import plugin
 
 
@@ -41,7 +41,7 @@ class StressNGTest(unittest.TestCase):
             timeout="99m", cleanup="False", items=[cpu]
         )
 
-        reference_jobfile = "./reference_jobfile"
+        reference_jobfile = "tests/reference_jobfile"
 
         result = stress.to_jobfile()
 
