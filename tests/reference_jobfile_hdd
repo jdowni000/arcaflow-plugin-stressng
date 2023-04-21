@@ -1,0 +1,4 @@
+timeout 10s
+hdd 1
+hdd-bytes 100m
+hdd-write-size 4m

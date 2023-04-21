@@ -19,6 +19,7 @@ class Stressors(enum.Enum):
     VM = "vm"
     MATRIX = "matrix"
     MQ = "mq"
+    HDD = "hdd"
 
 
 @dataclass
@@ -38,9 +39,19 @@ class CpuStressorParams:
         default="all",
         metadata={
             "name": "CPU stressor method",
-            "description": ("fine grained control of which "
-                            "cpu stressors to use (ackermann, "
-                            "cfloat etc."),
+            "description": (
+                "fine grained control of which "
+                "cpu stressors to use (ackermann, "
+                "cfloat etc."
+            ),
+        },
+    )
+
+    cpu_load: typing.Optional[int] = field(
+        default=None,
+        metadata={
+            "name": "CPU load",
+            "description": "load CPU by percentage",
         },
     )
 
@@ -48,6 +59,8 @@ class CpuStressorParams:
         result = "cpu {}\n".format(self.cpu_count)
         if self.cpu_method is not None:
             result = result + "cpu-method {}\n".format(self.cpu_method)
+        if self.cpu_load is not None:
+            result = result + "cpu-load {}\n".format(self.cpu_load)
         return result
 
 
@@ -63,8 +76,10 @@ class VmStressorParams:
     vm: int = field(
         metadata={
             "name": "VM count",
-            "description": ("Number of VM stressors to be "
-                            "run (0 means 1 stressor per CPU"),
+            "description": (
+                "Number of VM stressors to be "
+                "run (0 means 1 stressor per CPU"
+            ),
         }
     )
     vm_bytes: str = field(
@@ -73,12 +88,13 @@ class VmStressorParams:
             "description": "Amount of memory a single VM stressor will use",
         }
     )
+
     mmap: typing.Optional[str] = field(
         default=None,
         metadata={
             "name": "mmap",
             "description": "Number of stressors per CPU",
-        }
+        },
     )
     mmap_bytes: typing.Optional[str] = field(
         default=None, metadata={"name": "Allocation of memory per stressor"}
@@ -107,8 +123,10 @@ class MatrixStressorParams:
     matrix: int = field(
         metadata={
             "name": "Matrix count",
-            "description": ("Number of Matrix stressors to be "
-                            "run (0 means 1 stressor per CPU"),
+            "description": (
+                "Number of Matrix stressors to be "
+                "run (0 means 1 stressor per CPU"
+            ),
         }
     )
 
@@ -128,14 +146,60 @@ class MqStressorParams:
     mq: int = field(
         metadata={
             "name": "MQ count",
-            "description": ("Number of MQ stressors to be run "
-                            "(0 means 1 stressor per CPU)"),
+            "description": (
+                "Number of MQ stressors to be run "
+                "(0 means 1 stressor per CPU)"
+            ),
         }
     )
 
     def to_jobfile(self) -> str:
         mq = "mq {}\n".format(self.mq)
         result = mq
+        return result
+
+
+@dataclass
+class HDDStressorParams:
+    stressor: str
+    hdd: int = field(
+        metadata={
+            "name": "HDD workers",
+            "description": (
+                "start N workers continually writing, "
+                "reading and removing temporary files"
+            ),
+        }
+    )
+
+    hdd_bytes: str = field(
+        metadata={
+            "name": "Bytes per worker",
+            "description": (
+                "write  N  bytes for each hdd process, the default is 1 GB. "
+                "One can specify the size in units of Bytes, KBytes, "
+                "MBytes and GBytes using the suffix b, k, m or g."
+            ),
+        }
+    )
+
+    hdd_write_size: str = field(
+        metadata={
+            "name": "Write Size",
+            "description": (
+                "specify size of each write "
+                "in bytes. Size can be from 1 byte to 4MB"
+                "One can specify the size in units of Bytes, KBytes, "
+                "MBytes using the suffix b, k, m"
+            ),
+        }
+    )
+
+    def to_jobfile(self) -> str:
+        hdd = "hdd {}\n".format(self.hdd)
+        hdd_bytes = "hdd-bytes {}\n".format(self.hdd_bytes)
+        hdd_write_size = "hdd-write-size {}\n".format(self.hdd_write_size)
+        result = hdd + hdd_bytes + hdd_write_size
         return result
 
 
@@ -149,15 +213,16 @@ class StressNGParams:
     timeout: str = field(
         metadata={
             "name": "Runtime",
-            "description": "Time to run the benchmark test"
+            "description": "Time to run the benchmark test",
         }
     )
     cleanup: bool = field(
         metadata={
             "name": "Cleanup",
-            "description": "Cleanup after the benchmark run"
+            "description": "Cleanup after the benchmark run",
         }
     )
+
     items: typing.List[
         typing.Annotated[
             typing.Union[
@@ -168,11 +233,14 @@ class StressNGParams:
                     VmStressorParams, annotations.discriminator_value("vm")
                 ],
                 typing.Annotated[
-                    MatrixStressorParams, annotations.discriminator_value(
-                        "matrix")
+                    MatrixStressorParams,
+                    annotations.discriminator_value("matrix"),
                 ],
                 typing.Annotated[
                     MqStressorParams, annotations.discriminator_value("mq")
+                ],
+                typing.Annotated[
+                    HDDStressorParams, annotations.discriminator_value("hdd")
                 ],
             ],
             annotations.discriminator("stressor"),
@@ -180,16 +248,24 @@ class StressNGParams:
     ]
     verbose: typing.Optional[bool] = field(
         default=None,
-        metadata={
-            "name": "verbose",
-            "description": "verbose output"
-         },
+        metadata={"name": "verbose", "description": "verbose output"},
     )
     metrics_brief: typing.Optional[bool] = field(
         default=None,
         metadata={
             "name": "brief metrics",
             "description": "Brief version of the metrics output",
+        },
+    )
+
+    workdir: typing.Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "Working Dir",
+            "description": (
+                "Path were stress-ng will be "
+                "executed (example to target a specific volume)"
+            ),
         },
     )
 
@@ -258,14 +334,11 @@ class SystemInfoOutput:
     hostname: str = field(
         metadata={
             "name": "hostname",
-            "description": "host on which the test was run"
+            "description": "host on which the test was run",
         }
     )
     sysname: str = field(
-        metadata={
-           "name": "system name",
-           "description": "System name"
-        }
+        metadata={"name": "system name", "description": "System name"}
     )
     nodename: str = field(
         metadata={
@@ -280,8 +353,10 @@ class SystemInfoOutput:
         }
     )
     version: str = field(
-        metadata={"name": "version",
-                  "description": "version on which the test was run"}
+        metadata={
+            "name": "version",
+            "description": "version on which the test was run",
+        }
     )
     machine: str = field(
         metadata={
@@ -398,18 +473,46 @@ class CPUOutput:
     stressor: str
     bogo_ops: int = dataclasses.field(metadata={"id": "bogo-ops"})
     bogo_ops_per_second_usr_sys_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-usr-sys-time"}
+        metadata={
+            "id": "bogo-ops-per-second-usr-sys-time",
+            "name": "Bogus operations per second per user and sys time",
+            "description": (
+                "is the bogo-ops rate divided by the user + system time."
+                "This is the real per CPU throughput "
+                "taking into consideration "
+                "all the CPUs used and all the time consumed "
+                "by the stressor and kernel time."
+            ),
+        }
     )
     bogo_ops_per_second_real_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-real-time"}
+        metadata={
+            "id": "bogo-ops-per-second-real-time",
+            "name": "Bogus operations per second in real time",
+            "description": (
+                "real time measurement is how long the run took based "
+                "on the wall clock time "
+                "(that is, the time the stressor took to run)."
+            ),
+        }
     )
     wall_clock_time: float = dataclasses.field(
-        metadata={"id": "wall-clock-time"}
+        metadata={
+            "id": "wall-clock-time",
+            "name": "Wall clock time",
+            "description": "the time the stressor took to run",
+        }
     )
     user_time: float = dataclasses.field(metadata={"id": "user-time"})
     system_time: float = dataclasses.field(metadata={"id": "system-time"})
     cpu_usage_per_instance: float = dataclasses.field(
-        metadata={"id": "cpu-usage-per-instance"}
+        metadata={
+            "id": "cpu-usage-per-instance",
+            "name": "CPU usage per instance",
+            "description": (
+                "is the amount of CPU " "used by each stressor instance"
+            ),
+        }
     )
 
 
@@ -425,18 +528,64 @@ class MatrixOutput:
     stressor: str
     bogo_ops: int = dataclasses.field(metadata={"id": "bogo-ops"})
     bogo_ops_per_second_usr_sys_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-usr-sys-time"}
+        metadata={
+            "id": "bogo-ops-per-second-usr-sys-time",
+            "name": "Bogus operations per second per user and sys time",
+            "description": (
+                "is the bogo-ops rate divided by the user + system time."
+                "This is the real per CPU "
+                "throughput taking into consideration "
+                "all the CPUs used and all the time consumed "
+                "by the stressor and kernel time."
+            ),
+        }
     )
     bogo_ops_per_second_real_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-real-time"}
+        metadata={
+            "id": "bogo-ops-per-second-real-time",
+            "name": "Bogus operations per second in real time",
+            "description": (
+                "real time measurement is how long the run took based "
+                "on the wall clock time "
+                "(that is, the time the stressor took to run)."
+            ),
+        }
     )
     wall_clock_time: float = dataclasses.field(
-        metadata={"id": "wall-clock-time"}
+        metadata={
+            "id": "wall-clock-time",
+            "name": "Wall clock time",
+            "description": "the time the stressor took to run",
+        }
     )
-    user_time: float = dataclasses.field(metadata={"id": "user-time"})
-    system_time: float = dataclasses.field(metadata={"id": "system-time"})
+    user_time: float = dataclasses.field(
+        metadata={
+            "id": "user-time",
+            "name": "user time",
+            "description": (
+                "is the amount of CPU used running as a normal user process."
+                "Note with 4 CPUs this is about 4 x the wall clock time "
+                "(since no sys time is being used)."
+            ),
+        }
+    )
+    system_time: float = dataclasses.field(
+        metadata={
+            "id": "system-time",
+            "name": "system tyme",
+            "description": (
+                "measurement is the amount of CPU used in the kernel"
+            ),
+        }
+    )
     cpu_usage_per_instance: float = dataclasses.field(
-        metadata={"id": "cpu-usage-per-instance"}
+        metadata={
+            "id": "cpu-usage-per-instance",
+            "name": "CPU usage per instance",
+            "description": (
+                "is the amount of CPU used by each stressor instance"
+            ),
+        }
     )
 
 
@@ -452,22 +601,141 @@ class MQOutput:
     stressor: str
     bogo_ops: int = dataclasses.field(metadata={"id": "bogo-ops"})
     bogo_ops_per_second_usr_sys_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-usr-sys-time"}
+        metadata={
+            "id": "bogo-ops-per-second-usr-sys-time",
+            "name": "Bogus operations per second per user and sys time",
+            "description": (
+                "is the bogo-ops rate divided by the user + system time."
+                "This is the real per CPU "
+                "throughput taking into consideration "
+                "all the CPUs used and all the time consumed "
+                "by the stressor and kernel time."
+            ),
+        }
     )
     bogo_ops_per_second_real_time: float = dataclasses.field(
-        metadata={"id": "bogo-ops-per-second-real-time"}
+        metadata={
+            "id": "bogo-ops-per-second-real-time",
+            "name": "Bogus operations per second in real time",
+            "description": (
+                "real time measurement is how long the run took based "
+                "on the wall clock time "
+                "(that is, the time the stressor took to run)."
+            ),
+        }
     )
     wall_clock_time: float = dataclasses.field(
-        metadata={"id": "wall-clock-time"}
+        metadata={
+            "id": "wall-clock-time",
+            "name": "Wall clock time",
+            "description": "the time the stressor took to run",
+        }
     )
-    user_time: float = dataclasses.field(metadata={"id": "user-time"})
-    system_time: float = dataclasses.field(metadata={"id": "system-time"})
+    user_time: float = dataclasses.field(
+        metadata={
+            "id": "user-time",
+            "name": "user time",
+            "description": (
+                "is the amount of CPU used running as a normal user process."
+                "Note with 4 CPUs this is about 4 x the wall clock time "
+                "(since no sys time is being used)."
+            ),
+        }
+    )
+    system_time: float = dataclasses.field(
+        metadata={
+            "id": "system-time",
+            "name": "system tyme",
+            "description": (
+                "measurement is the amount of CPU used in the kernel"
+            ),
+        }
+    )
     cpu_usage_per_instance: float = dataclasses.field(
-        metadata={"id": "cpu-usage-per-instance"}
+        metadata={
+            "id": "cpu-usage-per-instance",
+            "name": "CPU usage per instance",
+            "description": (
+                "is the amount of CPU used by each stressor instance"
+            ),
+        }
     )
 
 
 mq_output_schema = plugin.build_object_schema(MQOutput)
+
+
+@dataclass
+class HDDOutput:
+    """
+    This is the data structure that holds the results for the HDD stressor
+    """
+
+    stressor: str
+    bogo_ops: int = dataclasses.field(metadata={"id": "bogo-ops"})
+    bogo_ops_per_second_usr_sys_time: float = dataclasses.field(
+        metadata={
+            "id": "bogo-ops-per-second-usr-sys-time",
+            "name": "Bogus operations per second per user and sys time",
+            "description": (
+                "is the bogo-ops rate divided by the user + system time."
+                "This is the real per CPU throughput "
+                "taking into consideration "
+                "all the CPUs used and all the time consumed "
+                "by the stressor and kernel time."
+            ),
+        }
+    )
+    bogo_ops_per_second_real_time: float = dataclasses.field(
+        metadata={
+            "id": "bogo-ops-per-second-real-time",
+            "name": "Bogus operations per second in real time",
+            "description": (
+                "real time measurement is how long the run took based "
+                "on the wall clock time "
+                "(that is, the time the stressor took to run)."
+            ),
+        }
+    )
+    wall_clock_time: float = dataclasses.field(
+        metadata={
+            "id": "wall-clock-time",
+            "name": "Wall clock time",
+            "description": "the time the stressor took to run",
+        }
+    )
+    user_time: float = dataclasses.field(
+        metadata={
+            "id": "user-time",
+            "name": "user time",
+            "description": (
+                "is the amount of CPU used running as a normal user process."
+                "Note with 4 CPUs this is about 4 x the wall clock time "
+                "(since no sys time is being used)."
+            ),
+        }
+    )
+    system_time: float = dataclasses.field(
+        metadata={
+            "id": "system-time",
+            "name": "system tyme",
+            "description": (
+                "measurement is the amount of CPU used in the kernel"
+            ),
+        }
+    )
+    cpu_usage_per_instance: float = dataclasses.field(
+        metadata={
+            "id": "cpu-usage-per-instance",
+            "name": "CPU usage per instance",
+            "description": (
+                "is the amount of CPU used by each stressor instance"
+            ),
+        }
+    )
+
+
+hdd_output_schema = plugin.build_object_schema(HDDOutput)
 
 
 @dataclass
@@ -481,6 +749,7 @@ class WorkloadResults:
     cpuinfo: typing.Optional[CPUOutput] = None
     matrixinfo: typing.Optional[MatrixOutput] = None
     mqinfo: typing.Optional[MQOutput] = None
+    hddinfo: typing.Optional[HDDOutput] = None
 
 
 @dataclass
@@ -502,7 +771,7 @@ class WorkloadError:
 )
 def stressng_run(
     params: WorkloadParams,
-) -> typing.Tuple[str, typing.Union[WorkloadResults, WorkloadError], ]:
+) -> typing.Tuple[str, typing.Union[WorkloadResults, WorkloadError]]:
     """
     This function is implementing the step.
     It needs the decorator to turn it into a step.
@@ -543,13 +812,16 @@ def stressng_run(
     ]
 
     print("==>> Running stress-ng with the temporary jobfile...")
+    workdir = "/tmp"
+    if params.StressNGParams.workdir is not None:
+        workdir = params.StressNGParams.workdir
     try:
         print(
             subprocess.check_output(
                 stressng_command,
-                cwd="/tmp",
+                cwd=workdir,
                 text=True,
-                stderr=subprocess.STDOUT
+                stderr=subprocess.STDOUT,
             )
         )
     except subprocess.CalledProcessError as error:
@@ -564,8 +836,10 @@ def stressng_run(
                 stressng_yaml = yaml.safe_load(output)
             except yaml.YAMLError as error:
                 print(error)
-                return "error", WorkloadError(f"""{error} in
-                                                  {stressng_outfile[1]}""")
+                return "error", WorkloadError(
+                    f"""{error} in
+                                                  {stressng_outfile[1]}"""
+                )
     except EnvironmentError as error:
         return "error", WorkloadError(
             f"{error} while trying to open {stressng_outfile[1]}"
@@ -579,6 +853,7 @@ def stressng_run(
     vminfo_un = None
     matrixinfo_un = None
     mqinfo_un = None
+    hddinfo_un = None
 
     system_un = system_info_output_schema.unserialize(system_info)
     for metric in metrics:
@@ -590,6 +865,8 @@ def stressng_run(
             matrixinfo_un = matrix_output_schema.unserialize(metric)
         if metric["stressor"] == "mq":
             mqinfo_un = mq_output_schema.unserialize(metric)
+        if metric["stressor"] == "hdd":
+            hddinfo_un = hdd_output_schema.unserialize(metric)
 
     print("==>> Workload run complete!")
     os.close(stressng_jobfile[0])
@@ -601,7 +878,12 @@ def stressng_run(
         os.remove(stressng_jobfile[1])
 
     return "success", WorkloadResults(
-        system_un, vminfo_un, cpuinfo_un, matrixinfo_un, mqinfo_un
+        system_un,
+        vminfo_un,
+        cpuinfo_un,
+        matrixinfo_un,
+        mqinfo_un,
+        hddinfo_un,
     )
 
 

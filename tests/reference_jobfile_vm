@@ -1,0 +1,5 @@
+timeout 10s
+vm 1
+vm-bytes 100m
+mmap 1
+mmap-bytes 10m

@@ -2,14 +2,19 @@
 StressNGParams:
   timeout: 1m
   cleanup: "true"
+  workdir: /tmp
   items:
     - stressor: cpu
       cpu_count: 2
       cpu_method: "all"
     - stressor: vm
-      vm: 2
-      vm_bytes: "2G"
+      vm: 5
+      vm_bytes: "20g"
     - stressor: matrix
       matrix: 1
     - stressor: mq
       mq: 2
+    - stressor: hdd
+      hdd: 1
+      hdd_bytes: 1g
+      hdd_write_size: 1m
