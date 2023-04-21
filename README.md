@@ -22,6 +22,7 @@ In order to run the [arca-stressng plugin](stressng_plugin.py) follow these step
 1. Clone this repository
 2. Create a python `venv` in the current directory with `python3 -m venv ./venv`
 3. Activate the `venv` by running `source ./venv/bin/activate`
-4. Run `pip install -r requirements.txt`
-5. Edit `stressng_example.yaml` to suit your needs
-6. Run `./stressng_plugin.py -f stressng_example.yaml`
+4. Install poetry `pip install poetry`
+5. Run `poetry install`
+6. Edit `stressng_example.yaml` to suit your needs
+7. Run `./stressng_plugin.py -f stressng_example.yaml`
