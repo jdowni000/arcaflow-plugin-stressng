@@ -2,7 +2,7 @@
 
 import unittest
 import yaml
-from arcaflow_plugin_stressng import stressng_plugin
+import stressng_plugin
 from arcaflow_plugin_sdk import plugin
 
 
