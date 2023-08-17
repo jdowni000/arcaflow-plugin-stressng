@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=stressng-schema.json
+cleanup: true
 StressNGParams:
   timeout: 1m
-  cleanup: "true"
   workdir: /tmp
-  items:
+  stressors:
     - stressor: cpu
       cpu_count: 2
       cpu_method: "all"
